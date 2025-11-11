@@ -1,18 +1,18 @@
 project(HermesHTTP_LIB)
 
-add_library(${PROJECT_NAME})
+add_library(${PROJECT_NAME} STATIC)
 target_sources(
     ${PROJECT_NAME}
     PRIVATE #Sources
-            socket/HMS_TCPSocket.cpp
-        
+            mt/HMS_Multithread.cpp
+            socket/HMS_Socket.cpp
+
     PRIVATE
         FILE_SET internalHeaders
         TYPE HEADERS
-        BASE_DIRS
-            socket
         FILES
-            socket/HMS_TCPSocket.h
+            mt/HMS_Multithread.h
+            socket/HMS_Socket.h
 
     INTERFACE
         FILE_SET consumerHeaders
@@ -22,3 +22,5 @@ target_sources(
         FILES
             Hermes.h
 )
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR})
