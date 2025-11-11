@@ -1,12 +1,8 @@
-#include "HermesHTTP.h"
-#include "iostream"
 #include <Hermes.h>
-#include <functional>
+#include <HermesHTTP.h>
 
 int main(int argc, char *argv[]) {
     HMS::Server server;
-
     server.run();
-
     server.stop();
 }
