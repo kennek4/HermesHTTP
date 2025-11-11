@@ -1,13 +1,12 @@
+#include "HermesHTTP.h"
+#include "iostream"
 #include <Hermes.h>
-#include <iostream>
+#include <functional>
 
 int main(int argc, char *argv[]) {
-    // Create server socket
-    HMS::TCPSocket *serverSocket = new HMS::TCPSocket(8080);
+    HMS::Server server;
 
-    int x;
-    std::cout << "Type a num: ";
-    std::cin >> x;
+    server.run();
 
-    delete serverSocket;
+    server.stop();
 }
