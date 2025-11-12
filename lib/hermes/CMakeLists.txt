@@ -14,6 +14,7 @@ add_library(${PROJECT_NAME} STATIC)
 target_sources(
     ${PROJECT_NAME}
     PRIVATE #Sources
+            http/HMS_Http.cpp
             mt/HMS_Multithread.cpp
             server/HMS_Server.cpp
             socket/HMS_Socket.cpp
@@ -22,6 +23,7 @@ target_sources(
         FILE_SET internalHeaders
         TYPE HEADERS
         FILES
+            http/HMS_Http.h
             mt/HMS_Multithread.h
             server/HMS_Server.h
             socket/HMS_Socket.h
