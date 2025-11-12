@@ -1,10 +1,21 @@
 project(HermesHTTP_LIB)
 
+include(FetchContent)
+
+FetchContent_Declare(
+  yaml-cpp
+  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(yaml-cpp)
+
+
 add_library(${PROJECT_NAME} STATIC)
 target_sources(
     ${PROJECT_NAME}
     PRIVATE #Sources
             mt/HMS_Multithread.cpp
+            server/HMS_Server.cpp
             socket/HMS_Socket.cpp
 
     PRIVATE
@@ -12,6 +23,7 @@ target_sources(
         TYPE HEADERS
         FILES
             mt/HMS_Multithread.h
+            server/HMS_Server.h
             socket/HMS_Socket.h
 
     INTERFACE
@@ -23,4 +35,7 @@ target_sources(
             Hermes.h
 )
 
+target_precompile_headers(${PROJECT_NAME} PRIVATE utility/HMS_pch.h)
 target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC yaml-cpp::yaml-cpp) 
+
