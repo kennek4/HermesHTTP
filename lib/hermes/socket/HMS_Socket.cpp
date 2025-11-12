@@ -1,5 +1,9 @@
 #include "HMS_Socket.h"
-#include <cassert>
+#include <arpa/inet.h>
+#include <iostream>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <unistd.h>
 
 namespace HMS {
 
@@ -11,18 +15,19 @@ void socketError(int socketFd) {
     throw std::runtime_error(errMsg);
 };
 
-void openSocket(Socket &_socket, SocketType _socketType) {
+void openSocket(Socket &_socket, SocketType _socketType, const char *ip,
+                int port) {
     _socket.fd = socket(AF_INET, SOCK_STREAM, 0);
     assert(_socket.fd != -1);
+
     if (_socket.fd == -1)
         socketError(_socket.fd);
 
-    _socket.address.sin_family = AF_INET; // IPv4
-    _socket.address.sin_addr.s_addr =
-        inet_addr("127.0.0.1"); // TODO: This IP should be the server's ID
-    _socket.address.sin_port = htons(HTTP_PORT); // Port 8080
+    _socket.address.sin_family      = AF_INET; // IPv4
+    _socket.address.sin_addr.s_addr = inet_addr(ip);
+    _socket.address.sin_port        = htons(port); // Port 8080
 
-    int opt                  = 1;
+    int opt                         = 1;
     setsockopt(_socket.fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
     if (bind(_socket.fd, reinterpret_cast<struct sockaddr *>(&_socket.address),
@@ -46,8 +51,6 @@ Socket getClient(int serverFd) {
         accept(serverFd, reinterpret_cast<struct sockaddr *>(&client.address),
                &client.length);
     assert(client.fd != -1);
-    if (client.fd == -1)
-        socketError(client.fd);
 
     return client;
 };
