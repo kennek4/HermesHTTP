@@ -1,4 +1,5 @@
 #include "HMS_Multithread.h"
+#include <thread>
 #include <tuple>
 
 namespace HMS {

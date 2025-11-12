@@ -14,6 +14,7 @@
 #include <functional>
 #include <iostream>
 #include <mutex>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <print>
 #include <queue>
@@ -27,3 +28,6 @@
 #include <unistd.h>
 #include <utility>
 #include <vector>
+
+// Extern
+#include <yaml-cpp/yaml.h>

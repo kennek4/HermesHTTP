@@ -1,9 +1,9 @@
 #pragma once
 
-#include <Hermes.h>
+#include "mt/HMS_Multithread.h"
+#include "socket/HMS_Socket.h"
 
 namespace HMS {
-namespace HTTP {
 
 template <class Function, class... Args>
 decltype(auto) job(Function &&func, Args &&...args) {
@@ -13,7 +13,10 @@ decltype(auto) job(Function &&func, Args &&...args) {
 void processRequest(const Socket &server, const Socket &client);
 void sendResponse(const Socket &server, const Socket &client);
 
-}; // namespace HTTP
+struct ConfigData {
+    std::string ip;
+    std::string port;
+};
 
 class Server {
   private:

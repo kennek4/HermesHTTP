@@ -1,7 +1,4 @@
-#include "HermesHTTP.h"
-#include "socket/HMS_Socket.h"
-#include <cassert>
-#include <tuple>
+#include "HMS_Server.h"
 
 namespace HMS {
 namespace HTTP {
@@ -19,15 +16,12 @@ void processRequest(const Socket &server, const Socket &client) {
     std::cout << "Connection from IP " << inet_ntoa(client.address.sin_addr)
               << "\n";
 
-    const char *response  = "<h1> This is a H1 Tag </h1>";
+    constexpr const char *response =
+        "HTTP/1.1 200 OK\r\nContent-Type: text\r\nContent-Length: "
+        "27\r\n\r\n<h1> This is a H1 Tag </h1>";
+    constexpr size_t responseLen = std::char_traits<char>::length(response);
 
-    std::string res       = "HTTP/1.1 200 OK\r\n";
-    res                  += "Content-Type: text\r\n";
-    res += "Content-Length: " + std::to_string(strlen(response)) + "\r\n";
-    res += "\r\n";
-    res += response;
-
-    send(client.fd, res.c_str(), res.length(), 0);
+    send(client.fd, response, responseLen, 0);
     close(client.fd);
 };
 
@@ -37,11 +31,19 @@ void sendResponse(const Socket &server, const Socket &client) {
 } // namespace HTTP
 
 void Server::run() {
+    YAML::Node yamlData = YAML::LoadFile("data/config.yaml");
+    ConfigData configData {.ip = yamlData["network"]["ip"].as<std::string>(),
+                           .port =
+                               yamlData["network"]["port"].as<std::string>()};
+
+    std::cout << "IP: " << configData.ip << "\n";
+    std::cout << "PORT: " << configData.port << "\n";
+
     Socket client {};
     bool isFinished = false;
 
-    openSocket(mSocket, SocketType::TCP);
-
+    openSocket(mSocket, SocketType::TCP, configData.ip.c_str(),
+               atoi(configData.port.c_str()));
     assert(mSocket.fd != -1);
 
     while (!isFinished) {
