@@ -1,5 +1,6 @@
 #pragma once
 
+#include "http/HMS_Http.h"
 #include "mt/HMS_Multithread.h"
 #include "socket/HMS_Socket.h"
 

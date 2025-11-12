@@ -1,9 +1,4 @@
 #include "HMS_Socket.h"
-#include <arpa/inet.h>
-#include <iostream>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <unistd.h>
 
 namespace HMS {
 
@@ -15,30 +10,30 @@ void socketError(int socketFd) {
     throw std::runtime_error(errMsg);
 };
 
-void openSocket(Socket &_socket, SocketType _socketType, const char *ip,
-                int port) {
-    _socket.fd = socket(AF_INET, SOCK_STREAM, 0);
-    assert(_socket.fd != -1);
+void openSocket(SocketProps props) {
+    props.pSocket->fd = socket(AF_INET, SOCK_STREAM, 0);
+    assert(props.pSocket->fd != -1);
 
-    if (_socket.fd == -1)
-        socketError(_socket.fd);
+    if (props.pSocket->fd == -1)
+        socketError(props.pSocket->fd);
 
-    _socket.address.sin_family      = AF_INET; // IPv4
-    _socket.address.sin_addr.s_addr = inet_addr(ip);
-    _socket.address.sin_port        = htons(port); // Port 8080
+    props.pSocket->address.sin_family      = AF_INET; // IPv4
+    props.pSocket->address.sin_addr.s_addr = inet_addr(props.ip);
+    props.pSocket->address.sin_port        = htons(props.port); // Port 8080
 
-    int opt                         = 1;
-    setsockopt(_socket.fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    int opt                                = 1;
+    setsockopt(props.pSocket->fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
-    if (bind(_socket.fd, reinterpret_cast<struct sockaddr *>(&_socket.address),
-             sizeof(_socket.address)) == -1)
-        socketError(_socket.fd);
+    if (bind(props.pSocket->fd,
+             reinterpret_cast<struct sockaddr *>(&props.pSocket->address),
+             sizeof(props.pSocket->address)) == -1)
+        socketError(props.pSocket->fd);
 
-    if (listen(_socket.fd, MAX_CONNECTIONS) == -1)
-        socketError(_socket.fd);
+    if (listen(props.pSocket->fd, MAX_CONNECTIONS) == -1)
+        socketError(props.pSocket->fd);
 
-    std::cout << "Started listening on " << inet_ntoa(_socket.address.sin_addr)
-              << ":8080"
+    std::cout << "Started listening on "
+              << inet_ntoa(props.pSocket->address.sin_addr) << ":8080"
               << "\n";
 };
 

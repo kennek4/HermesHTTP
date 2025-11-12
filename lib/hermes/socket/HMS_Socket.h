@@ -18,10 +18,16 @@ struct Socket {
     socklen_t length;
 };
 
+struct SocketProps {
+    Socket *pSocket {nullptr};
+    SocketType type {SocketType::TCP};
+    const char *ip {"localhost"};
+    int port {8080};
+};
+
 void socketError(int socketFd);
 
-void openSocket(Socket &_socket, SocketType _socketType, const char *ip,
-                int port);
+void openSocket(SocketProps props);
 void closeSocket(const Socket &_socket);
 
 Socket getClient(int serverFd);
