@@ -2,23 +2,75 @@
 #include "socket/HMS_Socket.h"
 
 namespace HMS {
-void Server::run() {
-    auto getIP = []() -> const char * {
-        char hostName[HOST_NAME_MAX];
-        gethostname(hostName, HOST_NAME_MAX);
+void Server::init() {
+    SocketProps socketProps {.pSocket = &mSocket};
+    std::cerr << "Loading default config...\n";
 
-        struct hostent *host = gethostbyname(hostName);
-        return inet_ntoa(
-            *reinterpret_cast<struct in_addr *>(host->h_addr_list[0]));
-    };
+    struct in_addr ip;
+    const int retVal = inet_aton("127.0.0.1", &ip);
+    assert(retVal == 1);
 
-    const char *ip = getIP();
-    SocketProps socketProps {
-        .pSocket = &mSocket, .type = SocketType::TCP, .ip = ip, .port = 8080};
+    socketProps.ip = ip;
 
     openSocket(socketProps);
     assert(mSocket.fd != -1);
+};
 
+void Server::init(const char *configFilePath) {
+    SocketProps socketProps {.pSocket = &mSocket};
+
+    std::cerr << "Loading " << configFilePath << "\n";
+
+    if (strcmp(configFilePath, "") == 0) {
+        throw std::runtime_error("The provided config filepath is empty!");
+    };
+
+    if (!std::filesystem::exists(configFilePath)) {
+        throw std::runtime_error("The provided config filepath is not valid!");
+    };
+
+    YAML::Node yamlData = YAML::LoadFile(configFilePath);
+    if (!yamlData["network"] && !yamlData["network"]["type"] &&
+        !yamlData["network"]["ip"] && !yamlData["network"]["port"])
+        throw std::runtime_error("Could not read the provided config file!");
+
+    int type = yamlData["network"]["type"].as<int>();
+
+    // NOTE: Check if type is in SocketType enum
+    if (type < 0 || type > 2)
+        throw std::runtime_error("The value for, type, in the provided "
+                                 "config file is out of bounds.");
+
+    struct in_addr ip;
+    int ipReturnCode =
+        inet_aton(yamlData["network"]["ip"].as<std::string>().c_str(), &ip);
+
+    // NOTE: inet_aton returns zero on error
+    if (ipReturnCode == 0)
+        throw std::runtime_error("The value for, ip, in the provided "
+                                 "config file is not a valid IPv4 address.");
+
+    int port = yamlData["network"]["port"].as<int>();
+
+    // NOTE:Check for valid HTTP port
+    if (port != 80 && port != 8008 && port != 8080)
+        throw std::runtime_error("The value for, port, in the provided "
+                                 "config file is out of bounds.");
+
+    socketProps.type = static_cast<SocketType>(type);
+    socketProps.ip   = ip;
+    socketProps.port = htons(port);
+
+    openSocket(socketProps);
+    assert(mSocket.fd != -1);
+};
+
+void Server::shutdown() {
+    mThreadPool.shutdown();
+    closeSocket(mSocket);
+};
+
+void Server::run() {
     Socket client {};
     bool isFinished = false;
 
@@ -26,13 +78,6 @@ void Server::run() {
         client = getClient(mSocket.fd);
         mThreadPool.queueJob(
             std::make_tuple(&HTTP::processRequest, mSocket, client));
-    };
-};
-
-void Server::stop() {
-    if (!mThreadPool.isBusy()) {
-        mThreadPool.shutdown();
-        closeSocket(mSocket);
     };
 };
 }; // namespace HMS

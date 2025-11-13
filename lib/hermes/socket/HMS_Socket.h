@@ -21,11 +21,9 @@ struct Socket {
 struct SocketProps {
     Socket *pSocket {nullptr};
     SocketType type {SocketType::TCP};
-    const char *ip {"localhost"};
-    int port {8080};
+    struct in_addr ip;
+    in_port_t port;
 };
-
-void socketError(int socketFd);
 
 void openSocket(SocketProps props);
 void closeSocket(const Socket &_socket);

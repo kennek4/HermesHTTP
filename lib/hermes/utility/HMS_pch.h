@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <functional>
 #include <iostream>
 #include <mutex>

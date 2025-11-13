@@ -23,14 +23,17 @@ class Server {
   private:
     Socket mSocket {};
     ThreadPool mThreadPool {};
-
     size_t mNumOfClients {0};
 
+    void init();
+    void init(const char *configFilePath);
+    void shutdown();
+
   public:
-    Server() { run(); };
-    ~Server() { stop(); };
+    Server() { init(); };
+    Server(const char *configFilePath) { init(configFilePath); };
+    ~Server() { shutdown(); };
 
     void run();
-    void stop();
 };
 }; // namespace HMS
