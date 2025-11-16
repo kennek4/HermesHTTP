@@ -77,7 +77,7 @@ void Server::run() {
     while (!isFinished) {
         client = getClient(mSocket.fd);
         mThreadPool.queueJob(
-            std::make_tuple(&HTTP::processRequest, mSocket, client));
+            std::make_tuple(&HTTP::handleConnection, mSocket, client));
     };
 };
 }; // namespace HMS
